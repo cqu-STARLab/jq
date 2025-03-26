@@ -1,0 +1,27 @@
+<launch>
+  <!-- 记得加上/ -->
+  <arg name="ns" default="" />
+  <node pkg="explore_lite" type="explore" respawn="false" name="explore" output="screen">
+    <param name="robot_base_frame" value="body"/>
+    <param name="costmap_topic" value="map"/>
+    <param name="costmap_updates_topic" value="map_updates"/>
+    <param name="visualize" value="true"/>
+    <!-- <param name="planner_frequency" value="0.33"/> -->
+    <!-- 如果是3D导航最好把频率设置高一点(2) 因为我懒得写路劲跟踪/local planner -->
+    <param name="planner_frequency" value="2"/>
+    <!-- 单次任务执行上限时间 -->
+    <!-- <param name="progress_timeout" value="30.0"/> -->
+    <param name="progress_timeout" value="5.0"/>
+    <param name="potential_scale" value="3.0"/>
+    <param name="orientation_scale" value="0.0"/>
+    <param name="gain_scale" value="1.0"/>
+    <param name="transform_tolerance" value="1.0"/>
+    <param name="min_frontier_size" value="0.75"/>
+    <!-- 是否启用3D导航 -->
+    <param name="is_3d_navigation" value="false"/>
+    <param name="cmd_topic" value="$(arg ns)/cmd_vel"/>
+    <param name="goal_3d_topic" value="$(arg ns)/goal"/>
+    <param name="map_radius" value="5.0"/>
+    <!-- 如果需要多车协同 注意/goal话题 这里取消了命名空间 -->
+  </node>
+</launch>

@@ -1,0 +1,17 @@
+<launch>
+  <!-- 设置参数 -->
+  <param name="use_sim_time" value="false" />
+
+  <!-- 启动生成目标点节点 -->
+  <node name="generate_goal_node" pkg="putn_map" type="generate_goal_from_boundary.py" output="screen">
+    <!-- 可选参数传递 -->
+      <!-- <remap from="~map"             to="/laser_cloud_map"/>  -->
+      <param name="resolution"      value="0.1" />
+      <param name="local_x_l"       value="-1.8"/>
+      <param name="local_x_u"       value="1.8"/>
+      <param name="local_y_l"       value="-1.8"/>
+      <param name="local_y_u"       value="1.8"/>
+      <param name="local_z_l"       value="-0.5"/>
+      <param name="local_z_u"       value="0.4"/>
+  </node>
+</launch>
