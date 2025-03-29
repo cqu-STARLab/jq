@@ -20,16 +20,21 @@
         <param name = "pointcloud_max_y" value="5" />
         <param name = "pointcloud_min_y" value="-5" /> -->
 
-        <param name = "pointcloud_max_z" value="3.0" />
-        <param name = "pointcloud_min_z" value="-1.8" />
+        <param name = "pointcloud_max_z" value="1.5" />
+        <param name = "pointcloud_min_z" value="-1.5" />
         <!-- 可以经过的角度限制 -->
         <param name = "angle_limit" value="40.0" />
         <!-- 可以经过的平坦度限制 -->
         <!-- <param name = "flatness_limit" value="0.048" /> -->
-        <param name = "flatness_limit" value="5.0" />
-        <param name = "neighbor_num" value="20"/>
+        <!-- <param name = "flatness_limit" value="5.0" /> -->
+        <param name = "flatness_limit" value="0.1" />
+        <param name = "w1" value = "0.8"/>
+        <!-- <param name = "flatness_limit" value="0.01" /> -->
+        <param name = "neighbor_num" value="2"/>
+        <!-- <param name = "neighbor_num" value="2"/> -->
         <!-- 是否即时更新点云 如果场景不太在意动态影响，选择false就好 -->
         <param name = "delete_previous_pc" value="false"/>
+        <!-- 可以设置为远处更新大，近处更新小，因为雷达会上下浮动 -->
         <!-- 更新点云的半径 室外需要尽量大一点 上次可行为30米 1米-->
         <param name = "delete_previous_pc_range" value="10"/>
         <!-- 更新点云的内半径 就是进入这个半径的点云就不再更新了 -->
@@ -37,16 +42,17 @@
         <param name = "save_range" value="3"/>
         <param name = "filter_ground" value="false" />
         <!-- 平面拟合范围 -->
-        <param name = "fit_plane_num" value="3"/>
+        <param name = "fit_plane_num" value="1"/>
         <!-- 截取输入点云 -->
         <param name = "delete_out_of_range_pc" value="true"/>
         <param name = "delete_out_of_range_pc_range" value="10"/>
 
         <!-- 计算占据地图时 保留z轴的范围 -->
-        <param name = "min_z_occ" value="-0.55"/>
-        <param name = "max_z_occ" value="-0.55"/>
+        <param name = "min_z_occ" value="-1.50"/>
+        <param name = "max_z_occ" value="-0.50"/>
         <!-- <remap from ="cloud_in" to="/cloud_registered" /> -->
         <remap from ="cloud_in" to="/cloud_registered_body" />
+        <!-- <remap from ="cloud_in" to="/ouster/points" /> -->
         <!-- <remap from ="cloud_in" to="/navigation_map" /> -->
         <!-- 重映射话题 -->
         <remap from="/projected_map" to="/map" />
@@ -55,12 +61,17 @@
         <!-- 噪声点考虑的邻居节点数量 -->
         <param name = "mean_k" value="20"/>
         <!-- 噪声点阈值 越小越严格 -->
-        <param name = "stddev_mul_thresh" value="0.15"/>
+        <param name = "stddev_mul_thresh" value="0.10"/>
         <!-- 是否过滤2D地图 -->
         <param name = "if_delete_2d" value="true"/>
         <!-- 周围的未知点数量，如果小于这个数量，那么修改 -->
-        <param name = "min_unknown_count" value="1"/>
+        <param name = "min_unknown_count" value="5"/>
         <!-- 周围的障碍物点数量，如果小于这个数量，那么修改 -->
-        <param name = "min_neighbor_count" value="3"/>
+        <param name = "min_neighbor_count" value="1"/>
+        <!-- 是否使用z轴平面拟合，如果使用，那么墙面识别就会很糟糕，但是室外场景的噪声会大幅度下降 -->
+        <param name = "plane_fit" value="false"/>
+        <!-- 平面拟合时，考虑的点最高相对高度，就是考虑这个点上下 plane_fit_z_min 到 plane_fit_z_max 的点 -->
+        <param name = "plane_fit_z_max" value = "0.3"/>
+        <param name = "plane_fit_z_min" value = "-1.5"/>
     </node>
 </launch>

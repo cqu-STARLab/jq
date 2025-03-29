@@ -23,5 +23,6 @@
     <param name="goal_3d_topic" value="$(arg ns)/goal"/>
     <param name="map_radius" value="5.0"/>
     <!-- 如果需要多车协同 注意/goal话题 这里取消了命名空间 -->
+    <param name="size_expand" value="2.0"/>
   </node>
 </launch>

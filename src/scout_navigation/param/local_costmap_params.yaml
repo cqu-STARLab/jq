@@ -8,7 +8,8 @@ local_costmap:
   publish_frequency: 2.0 #代价地图的发布频率
   transform_tolerance: 2 #等待坐标变换发布信息的超时时间
 
-  inflation_radius: 1.0
+  # inflation_radius: 1.0
+  inflation_radius: 0.8
 
  
   static_map: false  #不需要静态地图，可以提升导航效果

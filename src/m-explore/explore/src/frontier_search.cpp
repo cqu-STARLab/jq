@@ -15,11 +15,12 @@ using costmap_2d::NO_INFORMATION;
 using costmap_2d::FREE_SPACE;
 
 FrontierSearch::FrontierSearch(costmap_2d::Costmap2D* costmap,
-                               double potential_scale, double gain_scale,
+                               double potential_scale, double gain_scale, double clearance_scale,
                                double min_frontier_size)
   : costmap_(costmap)
   , potential_scale_(potential_scale)
   , gain_scale_(gain_scale)
+  , clearance_scale_(clearance_scale)
   , min_frontier_size_(min_frontier_size)
 {
 }

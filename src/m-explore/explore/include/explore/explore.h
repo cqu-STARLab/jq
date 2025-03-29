@@ -108,7 +108,7 @@ private:
   double navigation_radius_ = 1.5;
 
   // 指示是否启用3D导航
-  bool is_3d_navigation = true;
+  bool is_3d_navigation = false;
   // 3D导航话题发送
   ros::Publisher goal_3d_pub_;
   std::string goal_3d_topic_ = "/goal";
@@ -142,7 +142,7 @@ private:
 
   // parameters
   double planner_frequency_;
-  double potential_scale_, orientation_scale_, gain_scale_;
+  double potential_scale_, orientation_scale_, gain_scale_, clearance_scale_;
   ros::Duration progress_timeout_;
   bool visualize_;
 };

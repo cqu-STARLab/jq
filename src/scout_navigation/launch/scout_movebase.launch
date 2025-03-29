@@ -28,10 +28,12 @@
     <include file="$(find scout_navigation)/launch/PointsCloud2Laserscan.launch" />
 
     <include file="$(find scout_navigation)/launch/Pointcloud2Map.launch" />
+    <!-- 2D地图生成 2.0 版本 -->
+    <!-- <include file="$(find fitplane)/launch/launch/fit_world.launch"/> -->
 
     <include file="$(find scout_bringup)/launch/scout_mini_robot_base.launch" />
     <!-- 3D导航启动节点 -->
-    <include if="$(arg use_3d_navigation)" file="$(find putn_launch)/launch/bringup.launch"/>
+    <!-- <include if="$(arg use_3d_navigation)" file="$(find putn_launch)/launch/bringup.launch"/> -->
     <!-- <include file="$(find putn_launch)/launch/bringup.launch"/> -->
     
     <!-- 发布一个雷达body到机器人足端body_foot的静态映射 -->

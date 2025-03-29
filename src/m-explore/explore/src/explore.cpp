@@ -58,7 +58,7 @@ void Explore::navigationCallback(const geometry_msgs::Point::ConstPtr& msg)
     navigation_x_ = msg->x;
     navigation_y_ = msg->y;
     is_navigation = true;
-    is_constraint = false;
+    // is_constraint = false;
     std::cout<<"navigation_x_:"<<std::endl;
 }
 
@@ -68,7 +68,7 @@ void Explore::regionConstraintCallback(const geometry_msgs::PoseArray::ConstPtr&
         ROS_WARN("Region constraint message should contain at least 2 poses.");
         return;
     }
-    is_navigation = false;
+    // is_navigation = false;
         
     exploration_bottom_left_ = msg->poses[0].position;
     exploration_top_right_ = msg->poses[1].position;
@@ -81,10 +81,10 @@ void Explore::regionConstraintCallback(const geometry_msgs::PoseArray::ConstPtr&
   // double min_cr_x_,min_cr_y_;//左下角
   // double max_cr_x_,max_cr_y_;//右上角
     // 获取探索区域的 x, y 范围
-    double min_cr_x_ = std::min(exploration_bottom_left_.x, exploration_top_right_.x) - size_expand;
-    double max_cr_x_ = std::max(exploration_bottom_left_.x, exploration_top_right_.x) - size_expand;
-    double min_cr_y_ = std::min(exploration_bottom_left_.y, exploration_top_right_.y) - size_expand;
-    double max_cr_y_ = std::max(exploration_bottom_left_.y, exploration_top_right_.y) - size_expand;
+    min_cr_x_ = std::min(exploration_bottom_left_.x, exploration_top_right_.x) - size_expand;
+    max_cr_x_ = std::max(exploration_bottom_left_.x, exploration_top_right_.x) + size_expand;
+    min_cr_y_ = std::min(exploration_bottom_left_.y, exploration_top_right_.y) - size_expand;
+    max_cr_y_ = std::max(exploration_bottom_left_.y, exploration_top_right_.y) + size_expand;
 
     is_constraint = true;
 }
@@ -106,12 +106,14 @@ Explore::Explore()
   private_nh_.param("potential_scale", potential_scale_, 1e-3);
   private_nh_.param("orientation_scale", orientation_scale_, 0.0);
   private_nh_.param("gain_scale", gain_scale_, 1.0);
+  private_nh_.param("clearance_scale", clearance_scale_, 1.0);
   private_nh_.param("min_frontier_size", min_frontier_size, 0.5);
   private_nh_.param("is_3d_navigation", is_3d_navigation, true);
   private_nh_.param("cmd_topic", cmd_topic, std::string("/cmd_vel"));
   private_nh_.param("goal_3d_topic",goal_3d_topic_, std::string("/goal"));
   private_nh_.param("map_frame",map_frame, std::string("/map"));
   private_nh_.param("map_radius",map_radius, 5.0);
+  private_nh_.param("size_expand",size_expand, size_expand);
   // 这里获取的话题均以当前命名空间为基础
   navigation_sub_ = private_nh_.subscribe(navigation_topic_, 100, &Explore::navigationCallback,this);
   region_constraint_sub_ = private_nh_.subscribe(region_constraint_topic_, 100, &Explore::regionConstraintCallback,this);
@@ -120,7 +122,7 @@ Explore::Explore()
   cmd_pub = private_nh_.advertise<geometry_msgs::Twist>(cmd_topic, 10);
 
   search_ = frontier_exploration::FrontierSearch(costmap_client_.getCostmap(),
-                                                 potential_scale_, gain_scale_,
+                                                 potential_scale_, gain_scale_, clearance_scale_,
                                                  min_frontier_size);
 
   
@@ -273,19 +275,19 @@ void Explore::makePlan()
       ROS_INFO("navigaiton over");
       is_navigation = false;
       // 生成停止指令
-      geometry_msgs::Twist stop_cmd;
-      stop_cmd.linear.x = 0.0;
-      stop_cmd.linear.y = 0.0;
-      stop_cmd.linear.z = 0.0;
-      stop_cmd.angular.x = 0.0;
-      stop_cmd.angular.y = 0.0;
-      stop_cmd.angular.z = 0.0;
-      cmd_pub.publish(stop_cmd);
+      // geometry_msgs::Twist stop_cmd;
+      // stop_cmd.linear.x = 0.0;
+      // stop_cmd.linear.y = 0.0;
+      // stop_cmd.linear.z = 0.0;
+      // stop_cmd.angular.x = 0.0;
+      // stop_cmd.angular.y = 0.0;
+      // stop_cmd.angular.z = 0.0;
+      // cmd_pub.publish(stop_cmd);
       return;
     }
 // (!costmap2d_1->worldToMap(navigation_x_, navigation_y_, mx, my))
-    if (((distance>=map_radius)&&(!is_3d_navigation))
-    ||((is_3d_navigation)&&(distance>=map_radius))) {
+    if (((distance>=map_radius)&&(!is_3d_navigation)&&(is_navigation))
+    ||((is_3d_navigation)&&(distance>=map_radius)&&(is_navigation))) {
 
       ROS_INFO("we cant see the navigation target!");
       // 1.2. 执行判断，选择距离navigation_x_, navigation_y_ 最近的边界点作为目标
@@ -413,12 +415,18 @@ void Explore::makePlan()
   }
 
   //判定是否存在区域限制
-  // std::cout<<frontiers<<std::endl;
+  // std::cout<<min_cr_x_<<std::endl;
+  // std::cout<<max_cr_x_<<std::endl;
+  // std::cout<<min_cr_y_<<std::endl;
+  // std::cout<<max_cr_y_<<std::endl;
+  // for (const auto& f : frontiers) {
+  //       ROS_WARN_STREAM("  Frontier centroid: (" << f.centroid.x << ", " << f.centroid.y << ")");
+  // }
   if(is_constraint){
     frontiers.erase(std::remove_if(frontiers.begin(), frontiers.end(),
                                [&](const frontier_exploration::Frontier& f) {
-                                   return f.centroid.x >= min_cr_x_ && f.centroid.x <= max_cr_x_ ||
-                                          f.centroid.y >= min_cr_y_ && f.centroid.y <= max_cr_y_;
+                                   return (f.centroid.x < min_cr_x_ || f.centroid.x > max_cr_x_) ||
+                                          (f.centroid.y < min_cr_y_ || f.centroid.y > max_cr_y_);
                                }),
                 frontiers.end());
   // }
@@ -440,6 +448,7 @@ void Explore::makePlan()
                          return goalOnBlacklist(f.centroid);
                        });
   if (frontier == frontiers.end()) {
+    // todo:当前区域已经探索完毕了吗？
     stop();
     // 探索结束
     // 如果是3D导航那么需要发送停止指令 pose.position.x pose.position.y 这是机器人的坐标 
