@@ -1,0 +1,42 @@
+<launch>
+  <!-- 记得加上/ -->
+  <arg name="ns" default="" />
+  <node pkg="explore_lite" type="explore" respawn="false" name="explore" output="screen">
+    <param name="robot_base_frame" value="body"/>
+    <param name="costmap_topic" value="map"/>
+    <!-- <param name="costmap_topic" value="/move_base/global_costmap/costmap"/> -->
+    <param name="costmap_updates_topic" value="map_updates"/>
+    <!-- <param name="costmap_updates_topic" value="/move_base/global_costmap/costmap_updates"/> -->
+    <param name="visualize" value="true"/>
+    <!-- <param name="planner_frequency" value="0.33"/> -->
+    <!-- 如果是3D导航最好把频率设置高一点(2) 因为我懒得写路劲跟踪/local planner -->
+    <param name="planner_frequency" value="2"/>
+    <!-- 单次任务执行上限时间 -->
+    <!-- <param name="progress_timeout" value="30.0"/> -->
+    <!-- 基础等待时间 -->
+    <param name="progress_timeout" value="10.0"/>
+    <!-- 如果距离小车的距离为 30米以上，那么设置为6倍的timeout  -->
+    <param name="max_time" value="3"/>
+    <!-- 控制距离的cost，之前为3.0，设置为10 将更偏向于近距离的点 -->
+    <param name="potential_scale" value="10.0"/>
+    <param name="orientation_scale" value="0.0"/>
+    <param name="gain_scale" value="1.0"/>
+    <param name="transform_tolerance" value="1.0"/>
+    <!-- <param name="min_frontier_size" value="0.75"/> -->
+    <param name="min_frontier_size" value="0.5"/>
+    <!-- 是否启用3D导航 -->
+    <param name="is_3d_navigation" value="false"/>
+    <param name="cmd_topic" value="$(arg ns)/cmd_vel"/>
+    <param name="goal_3d_topic" value="$(arg ns)/goal"/>
+    <param name="map_radius" value="2.0"/>
+    <!-- 如果需要多车协同 注意/goal话题 这里取消了命名空间 -->
+    <param name="size_expand" value="2.0"/>
+    <!-- 扩张探索范围的上限 -->
+    <param name="size_expand_max" value="10.0"/>
+    <!-- make_plan的service -->
+    <!-- 是否过滤点 -->
+    <param name="if_check_path" value="true"/>
+    <param name="plan_service" value="/move_base/GlobalPlanner/make_plan"/>
+    <param name="map_frame" value="map"/>
+  </node>
+</launch>
