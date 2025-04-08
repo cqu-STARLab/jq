@@ -1,0 +1,16 @@
+<launch>
+
+    <node name="ugv1_node" pkg="allocation_pub_sub" type="ugv1" output="screen"/>
+    <node name="ugv2_node" pkg="allocation_pub_sub" type="ugv2" output="screen"/>
+    <node name="ugv3_node" pkg="allocation_pub_sub" type="ugv3" output="screen"/>
+    <node name="ugv4_node" pkg="allocation_pub_sub" type="ugv4" output="screen"/>
+    <node name="ugv5_node" pkg="allocation_pub_sub" type="ugv5" output="screen"/>
+    <node name="ugv6_node" pkg="allocation_pub_sub" type="ugv6" output="screen"/>
+    <node name="ugv7_node" pkg="allocation_pub_sub" type="ugv7" output="screen"/>
+    <node name="ugv8_node" pkg="allocation_pub_sub" type="ugv8" output="screen"/>
+    <node name="ugv9_node" pkg="allocation_pub_sub" type="ugv9" output="screen"/>
+    <node name="ugv10_node" pkg="allocation_pub_sub" type="ugv10" output="screen"/>
+    <node name="ugv11_node" pkg="allocation_pub_sub" type="ugv11" output="screen"/>
+    <node name="ugv12_node" pkg="allocation_pub_sub" type="ugv12" output="screen"/>
+    
+</launch>

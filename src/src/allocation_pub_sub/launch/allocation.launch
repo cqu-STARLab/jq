@@ -1,0 +1,13 @@
+<launch>
+    
+    <node name="Param_Intial_node" pkg="allocation_pub_sub" type="Param_Initial" output="screen"/>
+    <node name="allocati1on_node" pkg="allocation_pub_sub" type="main" output="screen"/>
+
+    <!-- <node name="multi_task_goals" pkg="turtlebot3_goals" type="multi_task_goals" output="screen"/> -->
+    
+    <!-- <node name="allocati1on_node" pkg="allocation_pub_sub" type="allocation" output="screen"/> -->
+    <!-- <node name="ugv1_node" pkg="allocation_pub_sub" type="ugv1" output="screen"/> -->
+    <!-- <node name="allocation" pkg="hello_vscode" type="hello_vscode" output="screen"/> -->
+    <!-- <node name="allocation" pkg="hello_vscode" type="allocation_pub" output="screen"/> -->
+    
+</launch>

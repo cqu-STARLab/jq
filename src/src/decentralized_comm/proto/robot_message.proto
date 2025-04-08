@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package decentralized;
+
+message RobotStatus {
+  int32 robot_id = 1;  // 机器人 ID
+  float x = 2;         // 坐标 X
+  float y = 3;         // 坐标 Y
+  float z = 4;         // 坐标 Z
+  int32 energy = 5;    // 电量
+}
+
+// 服务器回复客户端的确认消息
+message ServerAck {
+  int32 code = 1;              // 0=成功，非0=失败
+  string message = 2;          // 文本说明
+  int32 original_robot_id = 3; // 原请求robot_id（可选）
+}
+
+message NavigationPoint {
+  int32 robot_id = 1;  // 机器人 ID
+  float center_x1 = 2;         // 坐标 X
+  float center_y1 = 3;         // 坐标 Y
+  float left_x2 = 4;         // 坐标 X
+  float left_y2 = 5;         // 坐标 Y
+  float right_x3 = 6;         // 坐标 X
+  float right_y3 = 7;         // 坐标 Y
+}

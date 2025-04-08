@@ -138,6 +138,12 @@ private:
   std::string plan_service = "/move_base/GlobalPlanner/make_plan"; // 用于规划的planner
   ros::ServiceClient plan_client; // 获取plan的service
 
+  bool use_simple_goal = true;
+  std::string simple_goal_topic = "/move_base_simple/goal";
+  ros::Publisher simple_goal_pub_ ;
+
+  double expand_targe_size = 4.0; //目标点扩散半径
+
 
   Costmap2DClient costmap_client_;
   actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction>
@@ -147,7 +153,8 @@ private:
   ros::Timer oneshot_;
 
   std::vector<geometry_msgs::Point> frontier_blacklist_;
-  geometry_msgs::Point prev_goal_;
+  // geometry_msgs::Point prev_goal_;
+  geometry_msgs::Point prev_goal_{};
   double prev_distance_;
   ros::Time last_progress_;
   size_t last_markers_count_;

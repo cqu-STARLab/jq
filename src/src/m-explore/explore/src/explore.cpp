@@ -168,6 +168,16 @@ Explore::Explore()
   // 获取服务话题
   private_nh_.param("plan_service", plan_service, plan_service);
 
+  private_nh_.param("use_simple_goal", use_simple_goal, use_simple_goal);
+  private_nh_.param("simple_goal_topic", simple_goal_topic, simple_goal_topic);
+
+  private_nh_.param("expand_targe_size", expand_targe_size, expand_targe_size);
+
+  if(use_simple_goal)
+  {
+    simple_goal_pub_ = private_nh_.advertise<geometry_msgs::PoseStamped>(simple_goal_topic, 1);
+  }
+
   plan_client = private_nh_.serviceClient<nav_msgs::GetPlan>(plan_service);
   // 等待服务可用
   plan_client.waitForExistence();
@@ -181,7 +191,6 @@ Explore::Explore()
   search_ = frontier_exploration::FrontierSearch(costmap_client_.getCostmap(),
                                                  potential_scale_, gain_scale_, clearance_scale_,
                                                  min_frontier_size);
-
   
 
   if (visualize_) {
@@ -403,21 +412,36 @@ void Explore::makePlan()
       //   goal_3d_pub_.publish(goal_msg);
       //   return;
       // }
+      if(!use_simple_goal)
+      {
+        move_base_msgs::MoveBaseGoal goal;
+        goal.target_pose.pose.position.x = closest_centroid.x;
+        goal.target_pose.pose.position.y = closest_centroid.y;
+        goal.target_pose.pose.orientation.w = 1.;
+        goal.target_pose.header.frame_id = costmap_client_.getGlobalFrameID();
+        goal.target_pose.header.stamp = ros::Time::now();
+        // move_base_client_.cancelAllGoals();
+        // ros::Duration(0.1).sleep(); // 地性能 需要等待一会儿
+        move_base_client_.sendGoal(
+          goal, [this, target_position](
+                  const actionlib::SimpleClientGoalState& status,
+                  const move_base_msgs::MoveBaseResultConstPtr& result) {
+          reachedGoal(status, result, target_position);
+        });
+      }
+      else{  
+        // 创建目标点并发布
+        geometry_msgs::PoseStamped goal_msg;
+        goal_msg.header.frame_id = costmap_client_.getGlobalFrameID();
+        goal_msg.header.stamp = ros::Time::now();
+        goal_msg.pose.position.x = closest_centroid.x;
+        goal_msg.pose.position.y = closest_centroid.y;
+        goal_msg.pose.position.z = 0.0;
+        goal_msg.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
 
-      move_base_msgs::MoveBaseGoal goal;
-      goal.target_pose.pose.position.x = closest_centroid.x;
-      goal.target_pose.pose.position.y = closest_centroid.y;
-      goal.target_pose.pose.orientation.w = 1.;
-      goal.target_pose.header.frame_id = costmap_client_.getGlobalFrameID();
-      goal.target_pose.header.stamp = ros::Time::now();
-      // move_base_client_.cancelAllGoals();
-      // ros::Duration(0.1).sleep(); // 地性能 需要等待一会儿
-      move_base_client_.sendGoal(
-        goal, [this, target_position](
-                const actionlib::SimpleClientGoalState& status,
-                const move_base_msgs::MoveBaseResultConstPtr& result) {
-        reachedGoal(status, result, target_position);
-      });
+        simple_goal_pub_.publish(goal_msg);
+      }
+
       return;
 
     }else{
@@ -465,27 +489,43 @@ void Explore::makePlan()
       //   return;
       // }
 
-      // 可以看到目标点 那么直接驱动小车到达目标点
-      geometry_msgs::Point target_position;
-      // 设置目标位置的 x 和 y 坐标
-      target_position.x = navigation_x_;
-      target_position.y = navigation_y_;
-      target_position.z = 0.0;  // 如果是二维空间，z 可以设置为 0
+      if(!use_simple_goal)
+      {
+        // 可以看到目标点 那么直接驱动小车到达目标点
+        geometry_msgs::Point target_position;
+        // 设置目标位置的 x 和 y 坐标
+        target_position.x = navigation_x_;
+        target_position.y = navigation_y_;
+        target_position.z = 0.0;  // 如果是二维空间，z 可以设置为 0
 
-      move_base_msgs::MoveBaseGoal goal;
-      goal.target_pose.pose.position.x = navigation_x_;
-      goal.target_pose.pose.position.y = navigation_y_;
-      goal.target_pose.pose.orientation.w = 1.;
-      goal.target_pose.header.frame_id = costmap_client_.getGlobalFrameID();
-      goal.target_pose.header.stamp = ros::Time::now();
-      // move_base_client_.cancelAllGoals();
-      // ros::Duration(0.1).sleep(); // 地性能 需要等待一会儿
-      move_base_client_.sendGoal(
-        goal, [this, target_position](
-                const actionlib::SimpleClientGoalState& status,
-                const move_base_msgs::MoveBaseResultConstPtr& result) {
-        reachedGoal(status, result, target_position);
-      });
+        move_base_msgs::MoveBaseGoal goal;
+        goal.target_pose.pose.position.x = navigation_x_;
+        goal.target_pose.pose.position.y = navigation_y_;
+        goal.target_pose.pose.orientation.w = 1.;
+        goal.target_pose.header.frame_id = costmap_client_.getGlobalFrameID();
+        goal.target_pose.header.stamp = ros::Time::now();
+        // move_base_client_.cancelAllGoals();
+        // ros::Duration(0.1).sleep(); // 地性能 需要等待一会儿
+        move_base_client_.sendGoal(
+          goal, [this, target_position](
+                  const actionlib::SimpleClientGoalState& status,
+                  const move_base_msgs::MoveBaseResultConstPtr& result) {
+          reachedGoal(status, result, target_position);
+        });
+      }else{
+        // 创建目标点并发布
+        geometry_msgs::PoseStamped goal_msg;
+        goal_msg.header.frame_id = costmap_client_.getGlobalFrameID();
+        goal_msg.header.stamp = ros::Time::now();
+        goal_msg.pose.position.x = navigation_x_;
+        goal_msg.pose.position.y = navigation_y_;
+        goal_msg.pose.position.z = 0.0;
+        goal_msg.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
+
+        simple_goal_pub_.publish(goal_msg);
+      }
+
+
       return;
     }
   }
@@ -547,11 +587,24 @@ void Explore::makePlan()
   //     }
   std::vector<frontier_exploration::Frontier>::iterator frontier;
   if (if_check_path){
-    frontier =
-      std::find_if_not(frontiers.begin(), frontiers.end(),
-                       [this, &pose](const frontier_exploration::Frontier& f) {
-                         return goalOnBlacklist(f.centroid) || (makePlan_movebase(this->plan_client, {pose.position.x, pose.position.y}, {f.centroid.x, f.centroid.y})).empty();
-                       });
+    // frontier =
+    //   std::find_if_not(frontiers.begin(), frontiers.end(),
+    //                    [this, &pose](const frontier_exploration::Frontier& f) {
+    //                      return goalOnBlacklist(f.centroid) || (makePlan_movebase(this->plan_client, {pose.position.x, pose.position.y}, {f.centroid.x, f.centroid.y})).empty();
+    //                    });
+
+    frontier = std::find_if_not(frontiers.begin(), frontiers.end(),
+      [this, &pose](const frontier_exploration::Frontier& f) {
+        bool is_blacklisted = goalOnBlacklist(f.centroid);
+        bool unreachable = makePlan_movebase(this->plan_client,
+                                         {pose.position.x, pose.position.y},
+                                         {f.centroid.x, f.centroid.y}).empty();
+        bool too_far_to_prev = ((f.centroid.x - prev_goal_.x) * (f.centroid.x - prev_goal_.x) +
+                              (f.centroid.y - prev_goal_.y) * (f.centroid.y - prev_goal_.y)) > this->expand_targe_size;
+
+        return is_blacklisted || unreachable || too_far_to_prev;
+      }
+    );
   }else{
     frontier =
       std::find_if_not(frontiers.begin(), frontiers.end(),
@@ -668,21 +721,34 @@ void Explore::makePlan()
     goal_3d_pub_.publish(goal_msg);
     return;
   }
-
-  // send goal to move_base if we have something new to pursue
-  move_base_msgs::MoveBaseGoal goal;
-  goal.target_pose.pose.position = target_position;
-  goal.target_pose.pose.orientation.w = 1.;
-  goal.target_pose.header.frame_id = costmap_client_.getGlobalFrameID();
-  goal.target_pose.header.stamp = ros::Time::now();
-  // move_base_client_.cancelAllGoals();
-  // ros::Duration(0.1).sleep(); // 地性能 需要等待一会儿
-  move_base_client_.sendGoal(
-      goal, [this, target_position](
-                const actionlib::SimpleClientGoalState& status,
-                const move_base_msgs::MoveBaseResultConstPtr& result) {
-        reachedGoal(status, result, target_position);
+  if(!use_simple_goal)
+  {
+    // send goal to move_base if we have something new to pursue
+    move_base_msgs::MoveBaseGoal goal;
+    goal.target_pose.pose.position = target_position;
+    goal.target_pose.pose.orientation.w = 1.;
+    goal.target_pose.header.frame_id = costmap_client_.getGlobalFrameID();
+    goal.target_pose.header.stamp = ros::Time::now();
+    // move_base_client_.cancelAllGoals();
+    // ros::Duration(0.1).sleep(); // 地性能 需要等待一会儿
+    move_base_client_.sendGoal(
+        goal, [this, target_position](
+                  const actionlib::SimpleClientGoalState& status,
+                  const move_base_msgs::MoveBaseResultConstPtr& result) {
+          reachedGoal(status, result, target_position);
       });
+  }else{
+    // 创建目标点并发布
+    geometry_msgs::PoseStamped goal_msg;
+    goal_msg.header.frame_id = costmap_client_.getGlobalFrameID();
+    goal_msg.header.stamp = ros::Time::now();
+    goal_msg.pose.position.x = navigation_x_;
+    goal_msg.pose.position.y = navigation_y_;
+    goal_msg.pose.position.z = 0.0;
+    goal_msg.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
+
+    simple_goal_pub_.publish(goal_msg);
+  }
 }
 
 bool Explore::goalOnBlacklist(const geometry_msgs::Point& goal)
@@ -730,6 +796,9 @@ void Explore::stop()
 {
   move_base_client_.cancelAllGoals();
   // exploring_timer_.stop();
+  prev_goal_.x = 0.0;
+  prev_goal_.y = 0.0;
+  prev_goal_.z = 0.0;
   ROS_INFO("Exploration stopped.");
 }
 

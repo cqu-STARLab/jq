@@ -30,13 +30,18 @@
     <param name="goal_3d_topic" value="$(arg ns)/goal"/>
     <param name="map_radius" value="2.0"/>
     <!-- 如果需要多车协同 注意/goal话题 这里取消了命名空间 -->
-    <param name="size_expand" value="2.0"/>
+    <param name="size_expand" value="1.0"/>
     <!-- 扩张探索范围的上限 -->
-    <param name="size_expand_max" value="10.0"/>
+    <param name="size_expand_max" value="3.0"/>
     <!-- make_plan的service -->
     <!-- 是否过滤点 -->
     <param name="if_check_path" value="true"/>
     <param name="plan_service" value="/move_base/GlobalPlanner/make_plan"/>
     <param name="map_frame" value="map"/>
+    <!-- 切换导航模式 -->
+    <param name="use_simple_goal" value="true"/>
+    <param name="simple_goal_topic" value="/move_base_simple/goal"/>
+    <!-- 扩散幅度 设定下一个导航点优先观测 半径内的最近邻 如果没有 那么才全局选择 -->
+    <param name="expand_targe_size" value = "2.0"/>
   </node>
 </launch>

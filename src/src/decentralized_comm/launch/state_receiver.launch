@@ -1,0 +1,9 @@
+<launch>
+    <node pkg="decentralized_comm" type = "robot_receiver_node" name="robot_receiver_node">
+      <param name="bind_ip" value="127.0.0.1"/>
+      <param name="bind_port" value="6666"/>
+      <param name="connection_type" value="tcp"/>
+      <!-- <param name="zmq_socket_type" value="router"/> -->
+      <param name="num_thread" value="3"/>
+    </node>
+</launch>

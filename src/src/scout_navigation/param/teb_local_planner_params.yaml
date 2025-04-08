@@ -37,7 +37,7 @@ TebLocalPlannerROS:
     vertices: [[0.3, 0.3], [0.3, -0.3], [-0.3, -0.3], [-0.3, 0.3]] 
   # GoalTolerance
 
-  xy_goal_tolerance: 1.0
+  xy_goal_tolerance: 0.1 # before 1.0
   yaw_goal_tolerance: 3.14159
   free_goal_vel: True
   complete_global_plan: True
